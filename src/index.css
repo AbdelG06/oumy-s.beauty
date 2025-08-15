@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design system - All tokens use HSL. */
+@layer base {
+  :root {
+    /* Light theme */
+    --background: 24 33% 98%; /* warm ivory */
+    --foreground: 18 24% 18%; /* deep cocoa */
+
+    --card: 0 0% 100%;
+    --card-foreground: 18 24% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 18 24% 18%;
+
+    --primary: 18 45% 55%; /* rose gold */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 18 55% 70%;
+
+    --secondary: 18 45% 96%;
+    --secondary-foreground: 18 24% 18%;
+
+    --muted: 18 30% 94%;
+    --muted-foreground: 18 15% 40%;
+
+    --accent: 24 35% 95%;
+    --accent-foreground: 18 24% 18%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 18 20% 90%;
+    --input: 18 20% 90%;
+    --ring: 18 45% 55%;
+
+    --radius: 0.8rem;
+
+    --sidebar-background: 24 33% 98%;
+    --sidebar-foreground: 18 24% 18%;
+    --sidebar-primary: 18 45% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 24 35% 95%;
+    --sidebar-accent-foreground: 18 24% 18%;
+    --sidebar-border: 18 20% 90%;
+    --sidebar-ring: 18 45% 55%;
+
+    /* Extras */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --shadow-elegant: 0 16px 40px -12px hsl(var(--primary) / 0.35);
+  }
+
+  .dark {
+    --background: 20 20% 9%;
+    --foreground: 24 20% 96%;
+
+    --card: 24 16% 12%;
+    --card-foreground: 24 20% 96%;
+
+    --popover: 24 16% 12%;
+    --popover-foreground: 24 20% 96%;
+
+    --primary: 18 55% 70%;
+    --primary-foreground: 20 20% 10%;
+
+    --secondary: 20 16% 16%;
+    --secondary-foreground: 24 20% 96%;
+
+    --muted: 20 16% 16%;
+    --muted-foreground: 24 8% 70%;
+
+    --accent: 20 16% 16%;
+    --accent-foreground: 24 20% 96%;
+
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 20 16% 20%;
+    --input: 20 16% 20%;
+    --ring: 18 55% 70%;
+
+    --sidebar-background: 20 20% 9%;
+    --sidebar-foreground: 24 20% 96%;
+    --sidebar-primary: 18 55% 70%;
+    --sidebar-primary-foreground: 20 20% 10%;
+    --sidebar-accent: 20 16% 16%;
+    --sidebar-accent-foreground: 24 20% 96%;
+    --sidebar-border: 20 16% 16%;
+    --sidebar-ring: 18 55% 70%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+}
+
+/* Utilities for micro-interactions */
+@layer utilities {
+  .story-link {
+    position: relative;
+  }
+  .story-link::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%; height: 2px;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    background: hsl(var(--primary));
+    transition: transform 300ms ease;
+  }
+  .story-link:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+
+  .hover-scale { transition: transform 200ms ease; }
+  .hover-scale:hover { transform: scale(1.03); }
+}
