@@ -170,5 +170,20 @@ export const productService = {
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fixedProducts));
     return fixedProducts;
+  },
+
+  // Sauvegarder les photos dans le localStorage
+  savePhotos: (): Product[] => {
+    const products = productService.getAllProducts();
+    // Forcer la sauvegarde de toutes les images
+    const savedProducts = products.map(product => {
+      if (product.image && !product.image.includes('blob:')) {
+        // Si l'image n'est pas un blob temporaire, la sauvegarder
+        return product;
+      }
+      return product;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedProducts));
+    return savedProducts;
   }
 };

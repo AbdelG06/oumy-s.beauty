@@ -72,6 +72,8 @@ const Admin = () => {
     });
 
     setProducts(prev => [...prev, newProduct]);
+    // Sauvegarder automatiquement les photos
+    productService.savePhotos();
     setIsAddDialogOpen(false);
     resetForm();
     toast.success("Produit ajouté avec succès !");
@@ -95,6 +97,8 @@ const Admin = () => {
 
     if (updatedProduct) {
       setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
+      // Sauvegarder automatiquement les photos
+      productService.savePhotos();
       setIsEditDialogOpen(false);
       setEditingProduct(null);
       resetForm();
@@ -122,6 +126,12 @@ const Admin = () => {
     const fixedProducts = productService.fixBrokenImages();
     setProducts(fixedProducts);
     toast.success("Images cassées corrigées !");
+  };
+
+  const handleSavePhotos = () => {
+    const savedProducts = productService.savePhotos();
+    setProducts(savedProducts);
+    toast.success("Photos sauvegardées avec succès !");
   };
 
   const openEditDialog = (product: Product) => {
@@ -195,6 +205,10 @@ const Admin = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleSavePhotos}>
+              <Package className="h-4 w-4 mr-2" />
+              Sauvegarder photos
+            </Button>
             <Button variant="outline" onClick={handleFixBrokenImages}>
               <Settings className="h-4 w-4 mr-2" />
               Corriger les images

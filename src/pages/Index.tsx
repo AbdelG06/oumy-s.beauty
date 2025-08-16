@@ -270,9 +270,9 @@ const Index = () => {
 
       <footer className="border-t">
         <div className="container py-8 text-sm text-muted-foreground flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} Oumy's Beauty. Tous droits réservés - By AbdelG.</p>
+          <p>© {new Date().getFullYear()} Oumy's Beauty. Tous droits réservés - By <a href="https://www.instagram.com/abdelkrimgarwaoui_off/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">AbdelG</a>.</p>
           <a href="#" className="story-link">Page d'acceuil</a>
-      </div>
+        </div>
       </footer>
     </div>
   );
