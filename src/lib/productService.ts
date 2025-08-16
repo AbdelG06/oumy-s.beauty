@@ -147,6 +147,12 @@ export const productService = {
     return products;
   },
 
+  // Replace all products in localStorage (used when importing from remote)
+  replaceAllProducts: (products: Product[]): Product[] => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    return products;
+  },
+
   convertFileToBase64: (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();

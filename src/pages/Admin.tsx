@@ -10,9 +10,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Edit, Trash2, Package, LogOut, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, Package, LogOut, Settings, Cloud, DownloadCloud } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { productService, type Product } from "@/lib/productService";
+import { pushLocalToRemote, fetchRemoteProducts } from "@/lib/supabaseProductService";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -31,6 +32,7 @@ const Admin = () => {
     image: ""
   });
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [isMigrating, setIsMigrating] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -215,6 +217,45 @@ const Admin = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={async () => {
+              if (isMigrating) return;
+              try {
+                setIsMigrating(true);
+                const local = productService.getAllProducts();
+                if (!local || local.length === 0) {
+                  toast.error("Aucun produit à migrer");
+                  return;
+                }
+                await pushLocalToRemote(local);
+                toast.success("Migration terminée. Produits synchronisés vers Supabase.");
+              } catch (err: any) {
+                console.error(err);
+                toast.error("Erreur lors de la migration: " + (err?.message || String(err)));
+              } finally {
+                setIsMigrating(false);
+              }
+            }} disabled={isMigrating}>
+              <Cloud className="h-4 w-4 mr-2" />
+              {isMigrating ? 'Migration...' : 'Migrer vers Supabase'}
+            </Button>
+            <Button variant="outline" onClick={async () => {
+              try {
+                const remote = await fetchRemoteProducts();
+                if (!remote || remote.length === 0) {
+                  toast.error('Aucun produit trouvé sur Supabase');
+                  return;
+                }
+                productService.replaceAllProducts(remote as any);
+                setProducts(remote as any);
+                toast.success('Import terminé — produits locaux remplacés');
+              } catch (err: any) {
+                console.error(err);
+                toast.error('Erreur import Supabase: ' + (err?.message || String(err)));
+              }
+            }}>
+              <DownloadCloud className="h-4 w-4 mr-2" />
+              Importer depuis Supabase
+            </Button>
             <Button variant="outline" onClick={handleSavePhotos}>
               <Package className="h-4 w-4 mr-2" />
               Sauvegarder photos
