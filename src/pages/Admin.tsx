@@ -226,8 +226,11 @@ const Admin = () => {
                   toast.error("Aucun produit à migrer");
                   return;
                 }
-                await pushLocalToRemote(local);
-                toast.success("Migration terminée. Produits synchronisés vers Supabase.");
+                const pushed = await pushLocalToRemote(local);
+                // save returned products locally so the device that performed the migration has canonical data
+                productService.replaceAllProducts(pushed as any);
+                setProducts(pushed as any);
+                toast.success("Migration terminée. Produits synchronisés vers Supabase (local mis à jour).");
               } catch (err: any) {
                 console.error(err);
                 toast.error("Erreur lors de la migration: " + (err?.message || String(err)));

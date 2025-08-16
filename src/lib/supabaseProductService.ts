@@ -38,7 +38,7 @@ export async function fetchRemoteProducts(): Promise<Product[] | null> {
   }));
 }
 
-export async function pushLocalToRemote(localProducts: Product[]): Promise<void> {
+export async function pushLocalToRemote(localProducts: Product[]): Promise<Product[]> {
   if (!supabase) throw new Error('Supabase not configured');
   // Ensure bucket exists is not done here; assume created in Supabase dashboard
   const rows = [] as any[];
@@ -66,6 +66,21 @@ export async function pushLocalToRemote(localProducts: Product[]): Promise<void>
     });
   }
 
-  const { error } = await supabase.from(TABLE).upsert(rows, { onConflict: 'id' });
+  const { data, error } = await supabase.from(TABLE).upsert(rows, { onConflict: 'id', returning: 'representation' } as any);
   if (error) throw error;
+
+  // Map returned rows to Product[] shape
+  const returned = (data as any[]).map(d => ({
+    id: d.id,
+    name: d.name,
+    price: Number(d.price),
+    image: d.image,
+    description: d.description,
+    category: d.category,
+    stock: d.stock ?? 0,
+    createdAt: d.created_at,
+    updatedAt: d.updated_at
+  }));
+
+  return returned as Product[];
 }
