@@ -236,7 +236,9 @@ const Index = () => {
               <Music className="h-6 w-6 text-primary" />
               <div className="text-left">
                 <p className="font-medium">TikTok</p>
-                <p className="text-sm text-muted-foreground">{SITE?.social?.tiktok || 'Non disponible'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {SITE?.social?.tiktok ? (SITE?.social?.tiktok!.startsWith('@') ? SITE.social.tiktok : `@${SITE.social.tiktok}`) : 'Non disponible'}
+                </p>
               </div>
             </a>
           </div>

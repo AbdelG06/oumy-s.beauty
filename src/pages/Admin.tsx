@@ -55,54 +55,64 @@ const Admin = () => {
     setSelectedImageFile(null);
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (!formData.name || !formData.price || !formData.description) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
-    const newProduct = productService.addProduct({
-      name: formData.name,
-      price: parseFloat(formData.price),
-      description: formData.description,
-      category: formData.category || undefined,
-      stock: formData.stock ? parseInt(formData.stock) : undefined,
-      image: formData.image,
-      imageFile: selectedImageFile
-    });
+    try {
+      const newProduct = await productService.addProduct({
+        name: formData.name,
+        price: parseFloat(formData.price),
+        description: formData.description,
+        category: formData.category || undefined,
+        stock: formData.stock ? parseInt(formData.stock) : undefined,
+        image: formData.image,
+        imageFile: selectedImageFile
+      });
 
-    setProducts(prev => [...prev, newProduct]);
-    // Sauvegarder automatiquement les photos
-    productService.savePhotos();
-    setIsAddDialogOpen(false);
-    resetForm();
-    toast.success("Produit ajouté avec succès !");
+      setProducts(prev => [...prev, newProduct as Product]);
+      // Sauvegarder automatiquement les photos
+      productService.savePhotos();
+      setIsAddDialogOpen(false);
+      resetForm();
+      toast.success("Produit ajouté avec succès !");
+    } catch (error) {
+      toast.error("Erreur lors de l'ajout du produit");
+      console.error(error);
+    }
   };
 
-  const handleEditProduct = () => {
+  const handleEditProduct = async () => {
     if (!editingProduct || !formData.name || !formData.price || !formData.description) {
       toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
-    const updatedProduct = productService.updateProduct(editingProduct.id, {
-      name: formData.name,
-      price: parseFloat(formData.price),
-      description: formData.description,
-      category: formData.category || undefined,
-      stock: formData.stock ? parseInt(formData.stock) : undefined,
-      image: formData.image,
-      imageFile: selectedImageFile
-    });
+    try {
+      const updatedProduct = await productService.updateProduct(editingProduct.id, {
+        name: formData.name,
+        price: parseFloat(formData.price),
+        description: formData.description,
+        category: formData.category || undefined,
+        stock: formData.stock ? parseInt(formData.stock) : undefined,
+        image: formData.image,
+        imageFile: selectedImageFile
+      });
 
-    if (updatedProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
-      // Sauvegarder automatiquement les photos
-      productService.savePhotos();
-      setIsEditDialogOpen(false);
-      setEditingProduct(null);
-      resetForm();
-      toast.success("Produit modifié avec succès !");
+      if (updatedProduct) {
+        setProducts(prev => prev.map(p => p.id === editingProduct.id ? updatedProduct : p));
+        // Sauvegarder automatiquement les photos
+        productService.savePhotos();
+        setIsEditDialogOpen(false);
+        setEditingProduct(null);
+        resetForm();
+        toast.success("Produit modifié avec succès !");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la modification du produit");
+      console.error(error);
     }
   };
 

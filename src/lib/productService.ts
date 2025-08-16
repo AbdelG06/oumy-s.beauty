@@ -88,13 +88,14 @@ export const productService = {
   },
 
   // Ajouter un nouveau produit
-  addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">): Product => {
+  addProduct: async (product: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> => {
     const products = productService.getAllProducts();
     
-    // Gérer l'image : si c'est un fichier, créer une URL temporaire
+    // Gérer l'image : si c'est un fichier, convertir en base64
     let imageUrl = product.image;
     if (product.imageFile) {
-      imageUrl = URL.createObjectURL(product.imageFile);
+      // Convertir l'image en base64 pour la persistance
+      imageUrl = await productService.convertFileToBase64(product.imageFile);
     } else if (!product.image) {
       imageUrl = "https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=Produit";
     }
@@ -113,16 +114,16 @@ export const productService = {
   },
 
   // Mettre à jour un produit
-  updateProduct: (id: string, updates: Partial<Omit<Product, "id" | "createdAt">>): Product | null => {
+  updateProduct: async (id: string, updates: Partial<Omit<Product, "id" | "createdAt">>): Promise<Product | null> => {
     const products = productService.getAllProducts();
     const productIndex = products.findIndex(p => p.id === id);
     
     if (productIndex === -1) return null;
     
-    // Gérer l'image : si c'est un fichier, créer une URL temporaire
+    // Gérer l'image : si c'est un fichier, convertir en base64
     let imageUrl = updates.image || products[productIndex].image;
     if (updates.imageFile) {
-      imageUrl = URL.createObjectURL(updates.imageFile);
+      imageUrl = await productService.convertFileToBase64(updates.imageFile);
     }
     
     const updatedProduct: Product = {
@@ -133,7 +134,7 @@ export const productService = {
     };
     
     products[productIndex] = updatedProduct;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
     return updatedProduct;
   },
 
@@ -185,5 +186,23 @@ export const productService = {
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedProducts));
     return savedProducts;
+  },
+
+  // Convertir un fichier en base64 pour la persistance
+  convertFileToBase64: (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('Erreur de conversion'));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 };
+
+
