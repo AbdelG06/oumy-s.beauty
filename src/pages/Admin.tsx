@@ -112,6 +112,18 @@ const Admin = () => {
     }
   };
 
+  const handleResetToDefault = () => {
+    const defaultProducts = productService.resetToDefault();
+    setProducts(defaultProducts);
+    toast.success("Produits réinitialisés aux valeurs par défaut !");
+  };
+
+  const handleFixBrokenImages = () => {
+    const fixedProducts = productService.fixBrokenImages();
+    setProducts(fixedProducts);
+    toast.success("Images cassées corrigées !");
+  };
+
   const openEditDialog = (product: Product) => {
     setEditingProduct(product);
     setFormData({
@@ -182,13 +194,22 @@ const Admin = () => {
               Gérez votre catalogue de produits
             </p>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={resetForm}>
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter un produit
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleFixBrokenImages}>
+              <Settings className="h-4 w-4 mr-2" />
+              Corriger les images
+            </Button>
+            <Button variant="outline" onClick={handleResetToDefault}>
+              <Package className="h-4 w-4 mr-2" />
+              Réinitialiser
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un produit
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Ajouter un nouveau produit</DialogTitle>

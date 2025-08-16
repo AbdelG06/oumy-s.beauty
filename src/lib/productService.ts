@@ -56,13 +56,27 @@ export const productService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsedProducts = JSON.parse(stored);
+        // Vérifier que les produits ont des images valides
+        const validatedProducts = parsedProducts.map((product: Product) => {
+          if (!product.image || product.image.includes('/src/assets/')) {
+            // Corriger les chemins d'images cassés
+            const defaultProduct = DEFAULT_PRODUCTS.find(p => p.id === product.id);
+            if (defaultProduct) {
+              return { ...product, image: defaultProduct.image };
+            }
+          }
+          return product;
+        });
+        return validatedProducts;
       }
       // Si aucun produit stocké, initialiser avec les produits par défaut
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
       return DEFAULT_PRODUCTS;
     } catch (error) {
       console.error("Erreur lors de la récupération des produits:", error);
+      // En cas d'erreur, réinitialiser avec les produits par défaut
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
       return DEFAULT_PRODUCTS;
     }
   },
@@ -140,5 +154,21 @@ export const productService = {
   resetToDefault: (): Product[] => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
     return DEFAULT_PRODUCTS;
+  },
+
+  // Corriger les images cassées
+  fixBrokenImages: (): Product[] => {
+    const products = productService.getAllProducts();
+    const fixedProducts = products.map(product => {
+      if (!product.image || product.image.includes('/src/assets/')) {
+        const defaultProduct = DEFAULT_PRODUCTS.find(p => p.id === product.id);
+        if (defaultProduct) {
+          return { ...product, image: defaultProduct.image };
+        }
+      }
+      return product;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixedProducts));
+    return fixedProducts;
   }
 };

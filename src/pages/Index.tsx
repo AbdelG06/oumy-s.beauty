@@ -33,7 +33,9 @@ const Index = () => {
   // Charger les produits depuis le service
   useEffect(() => {
     const allProducts = productService.getAllProducts();
-    setProducts(allProducts);
+    // Corriger automatiquement les images cassées
+    const fixedProducts = productService.fixBrokenImages();
+    setProducts(fixedProducts);
   }, []);
 
   const total = useMemo(() => cart.reduce((sum, item) => sum + (products.find(p => p.id === item.id)?.price || 0) * item.qty, 0), [cart, products]);

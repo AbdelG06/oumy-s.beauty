@@ -13,6 +13,6 @@ export const SITE = {
   currencySymbol: "MAD",
   social: {
     instagram: "@oumys.beauty", // Remplacez par votre @ Instagram
-    tiktok: "@oumys.beauty", // Remplacez par votre @ TikTok
+    tiktok: "oumys.beauty", // Remplacez par votre @ TikTok (sans le @)
   },
 };
