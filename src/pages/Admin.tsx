@@ -199,10 +199,6 @@ const Admin = () => {
               <Settings className="h-4 w-4 mr-2" />
               Corriger les images
             </Button>
-            <Button variant="outline" onClick={handleResetToDefault}>
-              <Package className="h-4 w-4 mr-2" />
-              Réinitialiser
-            </Button>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
@@ -210,80 +206,83 @@ const Admin = () => {
                   Ajouter un produit
                 </Button>
               </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Ajouter un nouveau produit</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nom du produit *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Crème hydratante"
-                  />
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Ajouter un nouveau produit</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Nom du produit *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Ex: Crème hydratante"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="price">Prix (MAD) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="99.99"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Description détaillée du produit"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="category">Catégorie</Label>
+                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Soins">Soins</SelectItem>
+                        <SelectItem value="Maquillage">Maquillage</SelectItem>
+                        <SelectItem value="Parfums">Parfums</SelectItem>
+                        <SelectItem value="Accessoires">Accessoires</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="stock">Stock</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      value={formData.stock}
+                      onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
+                      placeholder="50"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <ImageUpload
+                      onImageSelect={setSelectedImageFile}
+                      currentImage={formData.image}
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="price">Prix (MAD) *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="99.99"
-                  />
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button onClick={handleAddProduct}>
+                    Ajouter
+                  </Button>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Description détaillée du produit"
-                    rows={3}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="category">Catégorie</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Soins">Soins</SelectItem>
-                      <SelectItem value="Maquillage">Maquillage</SelectItem>
-                      <SelectItem value="Parfums">Parfums</SelectItem>
-                      <SelectItem value="Accessoires">Accessoires</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="stock">Stock</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
-                    placeholder="50"
-                  />
-                </div>
-                <ImageUpload
-                  onImageSelect={setSelectedImageFile}
-                  currentImage={formData.image}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button onClick={handleAddProduct}>
-                  Ajouter
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Products Grid */}
@@ -434,10 +433,12 @@ const Admin = () => {
                 placeholder="50"
               />
             </div>
-                            <ImageUpload
-                  onImageSelect={setSelectedImageFile}
-                  currentImage={formData.image}
-                />
+            <div className="grid gap-2">
+              <ImageUpload
+                onImageSelect={setSelectedImageFile}
+                currentImage={formData.image}
+              />
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
