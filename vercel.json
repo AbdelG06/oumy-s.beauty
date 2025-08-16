@@ -16,7 +16,7 @@
       ]
     },
     {
-      "source": "/product-*.jpg",
+      "source": "/product-:id.jpg",
       "headers": [
         {
           "key": "Cache-Control",
