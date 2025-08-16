@@ -5,28 +5,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Phone, Instagram, Music } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Phone, Instagram, Music, Settings } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
 import { SITE } from "@/config/site";
-import serum from "@/assets/product-serum.jpg";
-import cream from "@/assets/product-cream.jpg";
-import palette from "@/assets/product-palette.jpg";
+import { productService, type Product } from "@/lib/productService";
 
 const LOGO_URL = "/pic/logo.png";
 
-type Product = {
-  id: string;
-  name: string;
-  price: number; // en unités monétaires (ex: 12900 CFA)
-  image: string;
-  description: string;
-};
-
-const PRODUCTS: Product[] = [
-  { id: "serum", name: "Sérum Éclat", price: 100, image: serum, description: "Illumine et unifie le teint grâce à un complexe vitaminé." },
-  { id: "cream", name: "Crème Hydratante", price: 122, image: cream, description: "Hydratation 24h, texture velours inspirée du rose gold." },
-  { id: "palette", name: "Palette Nude", price: 99, image: palette, description: "Tons naturels et élégants pour un regard doux au quotidien." },
-];
+// Suppression du type Product et de PRODUCTS car ils sont maintenant importés du service
 
 type CartItem = { id: string; qty: number };
 
@@ -37,14 +23,21 @@ const currency = (v: number) =>
   }).format(v);
 
 const Index = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
   const [fullname, setFullname] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
-  const total = useMemo(() => cart.reduce((sum, item) => sum + (PRODUCTS.find(p => p.id === item.id)?.price || 0) * item.qty, 0), [cart]);
-  const itemsDetailed = useMemo(() => cart.map(ci => ({ ...ci, product: PRODUCTS.find(p => p.id === ci.id)! })), [cart]);
+  // Charger les produits depuis le service
+  useEffect(() => {
+    const allProducts = productService.getAllProducts();
+    setProducts(allProducts);
+  }, []);
+
+  const total = useMemo(() => cart.reduce((sum, item) => sum + (products.find(p => p.id === item.id)?.price || 0) * item.qty, 0), [cart, products]);
+  const itemsDetailed = useMemo(() => cart.map(ci => ({ ...ci, product: products.find(p => p.id === ci.id)! })), [cart, products]);
 
   const addToCart = (id: string) => setCart(prev => {
     const found = prev.find(i => i.id === id);
@@ -75,7 +68,7 @@ const Index = () => {
   const productsLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    itemListElement: PRODUCTS.map((p, idx) => ({
+    itemListElement: products.map((p, idx) => ({
       "@type": "Product",
       position: idx + 1,
       name: p.name,
@@ -103,6 +96,10 @@ const Index = () => {
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <a href="#produits" className="story-link">Produits</a>
             <a href="#localisation" className="story-link">Localisation</a>
+            <a href="/admin/login" className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+              <Settings className="h-4 w-4" />
+              Admin
+            </a>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button variant="soft">Panier ({cart.reduce((n, i) => n + i.qty, 0)})</Button>
@@ -177,7 +174,7 @@ const Index = () => {
       <main id="produits" className="container py-16 md:py-20">
         <h2 className="font-display text-3xl md:text-4xl mb-8">Nos produits</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {PRODUCTS.map((p) => (
+          {products.map((p) => (
             <Card key={p.id} className="group overflow-hidden">
               <CardHeader className="p-0">
                 <img src={p.image} alt={`${p.name} – Oumy's Beauty`} className="h-56 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
@@ -271,9 +268,9 @@ const Index = () => {
 
       <footer className="border-t">
         <div className="container py-8 text-sm text-muted-foreground flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} Oumy's Beauty. Tous droits réservés - By LYAZID GARWAOUI.</p>
+          <p>© {new Date().getFullYear()} Oumy's Beauty. Tous droits réservés - By AbdelG.</p>
           <a href="#" className="story-link">Page d'acceuil</a>
-        </div>
+      </div>
       </footer>
     </div>
   );
