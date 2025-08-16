@@ -3,7 +3,7 @@ export type Product = {
   name: string;
   price: number;
   image: string;
-  imageFile?: File; // Fichier d'image temporaire
+  imageFile?: File;
   description: string;
   category?: string;
   stock?: number;
@@ -11,39 +11,38 @@ export type Product = {
   updatedAt: string;
 };
 
-const STORAGE_KEY = "oumy_beauty_products";
+const STORAGE_KEY = 'oumy_beauty_products';
 
-// Produits par défaut
 const DEFAULT_PRODUCTS: Product[] = [
   {
-    id: "serum",
-    name: "Sérum Éclat",
+    id: 'serum',
+    name: 'Sérum Éclat',
     price: 100,
-    image: "/product-serum.jpg",
-    description: "Illumine et unifie le teint grâce à un complexe vitaminé.",
-    category: "Soins",
+    image: '/product-serum.jpg',
+    description: 'Illumine et unifie le teint grâce à un complexe vitaminé.',
+    category: 'Soins',
     stock: 50,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
-    id: "cream",
-    name: "Crème Hydratante",
+    id: 'cream',
+    name: 'Crème Hydratante',
     price: 122,
-    image: "/product-cream.jpg",
-    description: "Hydratation 24h, texture velours inspirée du rose gold.",
-    category: "Soins",
+    image: '/product-cream.jpg',
+    description: 'Hydratation 24h, texture velours inspirée du rose gold.',
+    category: 'Soins',
     stock: 30,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
-    id: "palette",
-    name: "Palette Nude",
+    id: 'palette',
+    name: 'Palette Nude',
     price: 99,
-    image: "/product-palette.jpg",
-    description: "Tons naturels et élégants pour un regard doux au quotidien.",
-    category: "Maquillage",
+    image: '/product-palette.jpg',
+    description: 'Tons naturels et élégants pour un regard doux au quotidien.',
+    category: 'Maquillage',
     stock: 25,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -51,158 +50,113 @@ const DEFAULT_PRODUCTS: Product[] = [
 ];
 
 export const productService = {
-  // Récupérer tous les produits
   getAllProducts: (): Product[] => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsedProducts = JSON.parse(stored);
-        // Vérifier que les produits ont des images valides
-        const validatedProducts = parsedProducts.map((product: Product) => {
-          if (!product.image || product.image.includes('/src/assets/')) {
-            // Corriger les chemins d'images cassés
-            const defaultProduct = DEFAULT_PRODUCTS.find(p => p.id === product.id);
-            if (defaultProduct) {
-              return { ...product, image: defaultProduct.image };
-            }
-          }
-          return product;
-        });
-        return validatedProducts;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
+        return DEFAULT_PRODUCTS;
       }
-      // Si aucun produit stocké, initialiser avec les produits par défaut
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-      return DEFAULT_PRODUCTS;
-    } catch (error) {
-      console.error("Erreur lors de la récupération des produits:", error);
-      // En cas d'erreur, réinitialiser avec les produits par défaut
+      const parsed = JSON.parse(raw) as Product[];
+      return parsed.map(p => {
+        if (!p.image || p.image.includes('/src/assets/')) {
+          const def = DEFAULT_PRODUCTS.find(d => d.id === p.id);
+          if (def) return { ...p, image: def.image };
+        }
+        return p;
+      });
+    } catch (e) {
+      console.error('productService.getAllProducts error', e);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
       return DEFAULT_PRODUCTS;
     }
   },
 
-  // Récupérer un produit par ID
   getProductById: (id: string): Product | null => {
     const products = productService.getAllProducts();
     return products.find(p => p.id === id) || null;
   },
 
-  // Ajouter un nouveau produit
-  addProduct: async (product: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> => {
+  addProduct: async (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
     const products = productService.getAllProducts();
-    
-    // Gérer l'image : si c'est un fichier, convertir en base64
-    let imageUrl = product.image;
-    if (product.imageFile) {
-      // Convertir l'image en base64 pour la persistance
-      imageUrl = await productService.convertFileToBase64(product.imageFile);
-    } else if (!product.image) {
-      imageUrl = "https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=Produit";
+    let imageUrl = (product as any).image as string | undefined;
+    if ((product as any).imageFile) {
+      imageUrl = await productService.convertFileToBase64((product as any).imageFile);
     }
-    
+    if (!imageUrl) imageUrl = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=Produit';
     const newProduct: Product = {
       ...product,
-      id: `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `product_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
       image: imageUrl,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
-    const updatedProducts = [...products, newProduct];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+    const updated = [...products, newProduct];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return newProduct;
   },
 
-  // Mettre à jour un produit
-  updateProduct: async (id: string, updates: Partial<Omit<Product, "id" | "createdAt">>): Promise<Product | null> => {
+  updateProduct: async (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<Product | null> => {
     const products = productService.getAllProducts();
-    const productIndex = products.findIndex(p => p.id === id);
-    
-    if (productIndex === -1) return null;
-    
-    // Gérer l'image : si c'est un fichier, convertir en base64
-    let imageUrl = updates.image || products[productIndex].image;
-    if (updates.imageFile) {
-      imageUrl = await productService.convertFileToBase64(updates.imageFile);
+    const idx = products.findIndex(p => p.id === id);
+    if (idx === -1) return null;
+    let imageUrl = (updates as any).image || products[idx].image;
+    if ((updates as any).imageFile) {
+      imageUrl = await productService.convertFileToBase64((updates as any).imageFile);
     }
-    
     const updatedProduct: Product = {
-      ...products[productIndex],
+      ...products[idx],
       ...updates,
       image: imageUrl,
       updatedAt: new Date().toISOString()
     };
-    
-    products[productIndex] = updatedProduct;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    products[idx] = updatedProduct;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
     return updatedProduct;
   },
 
-  // Supprimer un produit
   deleteProduct: (id: string): boolean => {
     const products = productService.getAllProducts();
-    const filteredProducts = products.filter(p => p.id !== id);
-    
-    if (filteredProducts.length === products.length) {
-      return false; // Produit non trouvé
-    }
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredProducts));
+    const filtered = products.filter(p => p.id !== id);
+    if (filtered.length === products.length) return false;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     return true;
   },
 
-  // Réinitialiser les produits par défaut
   resetToDefault: (): Product[] => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
     return DEFAULT_PRODUCTS;
   },
 
-  // Corriger les images cassées
   fixBrokenImages: (): Product[] => {
     const products = productService.getAllProducts();
-    const fixedProducts = products.map(product => {
-      if (!product.image || product.image.includes('/src/assets/')) {
-        const defaultProduct = DEFAULT_PRODUCTS.find(p => p.id === product.id);
-        if (defaultProduct) {
-          return { ...product, image: defaultProduct.image };
-        }
+    const fixed = products.map(p => {
+      if (!p.image || p.image.includes('/src/assets/')) {
+        const def = DEFAULT_PRODUCTS.find(d => d.id === p.id);
+        if (def) return { ...p, image: def.image };
       }
-      return product;
+      return p;
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixedProducts));
-    return fixedProducts;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+    return fixed;
   },
 
-  // Sauvegarder les photos dans le localStorage
   savePhotos: (): Product[] => {
     const products = productService.getAllProducts();
-    // Forcer la sauvegarde de toutes les images
-    const savedProducts = products.map(product => {
-      if (product.image && !product.image.includes('blob:')) {
-        // Si l'image n'est pas un blob temporaire, la sauvegarder
-        return product;
-      }
-      return product;
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedProducts));
-    return savedProducts;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    return products;
   },
 
-  // Convertir un fichier en base64 pour la persistance
   convertFileToBase64: (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Erreur de conversion'));
-        }
+        if (typeof reader.result === 'string') resolve(reader.result);
+        else reject(new Error('Erreur conversion'));
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   }
 };
-
 
