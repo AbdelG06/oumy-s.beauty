@@ -10,10 +10,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Edit, Trash2, Package, LogOut, Settings, Cloud, DownloadCloud } from "lucide-react";
+import { Plus, Edit, Trash2, Package, LogOut, Settings, Cloud } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { productService, type Product } from "@/lib/productService";
-import { pushLocalToRemote, fetchRemoteProducts } from "@/lib/supabaseProductService";
+import { pushLocalToRemote } from "@/lib/supabaseProductService";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -226,11 +226,8 @@ const Admin = () => {
                   toast.error("Aucun produit à migrer");
                   return;
                 }
-                const pushed = await pushLocalToRemote(local);
-                // save returned products locally so the device that performed the migration has canonical data
-                productService.replaceAllProducts(pushed as any);
-                setProducts(pushed as any);
-                toast.success("Migration terminée. Produits synchronisés vers Supabase (local mis à jour).");
+                await pushLocalToRemote(local);
+                toast.success("Migration terminée. Produits synchronisés vers Supabase.");
               } catch (err: any) {
                 console.error(err);
                 toast.error("Erreur lors de la migration: " + (err?.message || String(err)));
@@ -240,24 +237,6 @@ const Admin = () => {
             }} disabled={isMigrating}>
               <Cloud className="h-4 w-4 mr-2" />
               {isMigrating ? 'Migration...' : 'Migrer vers Supabase'}
-            </Button>
-            <Button variant="outline" onClick={async () => {
-              try {
-                const remote = await fetchRemoteProducts();
-                if (!remote || remote.length === 0) {
-                  toast.error('Aucun produit trouvé sur Supabase');
-                  return;
-                }
-                productService.replaceAllProducts(remote as any);
-                setProducts(remote as any);
-                toast.success('Import terminé — produits locaux remplacés');
-              } catch (err: any) {
-                console.error(err);
-                toast.error('Erreur import Supabase: ' + (err?.message || String(err)));
-              }
-            }}>
-              <DownloadCloud className="h-4 w-4 mr-2" />
-              Importer depuis Supabase
             </Button>
             <Button variant="outline" onClick={handleSavePhotos}>
               <Package className="h-4 w-4 mr-2" />
