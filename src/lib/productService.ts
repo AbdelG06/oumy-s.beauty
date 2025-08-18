@@ -66,6 +66,11 @@ export const productService = {
     return newProduct;
   },
 
+  setAllProducts: (products: Product[]): Product[] => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    return products;
+  },
+
   updateProduct: (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null => {
     const products = productService.getAllProducts();
     const index = products.findIndex(p => p.id === id);

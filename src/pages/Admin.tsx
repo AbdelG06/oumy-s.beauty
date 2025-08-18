@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Edit, Trash2, Package, LogOut, Settings, Cloud } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { productService, type Product } from "@/lib/productService";
-import { pushLocalToRemote } from "@/lib/supabaseProductService";
+import { pushLocalToRemote, importRemoteToLocal } from "@/lib/supabaseProductService";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -64,7 +64,7 @@ const Admin = () => {
     }
 
     try {
-      const newProduct = await productService.addProduct({
+      const newProduct = await productService.createProduct({
         name: formData.name,
         price: parseFloat(formData.price),
         description: formData.description,
@@ -237,6 +237,27 @@ const Admin = () => {
             }} disabled={isMigrating}>
               <Cloud className="h-4 w-4 mr-2" />
               {isMigrating ? 'Migration...' : 'Migrer vers Supabase'}
+            </Button>
+            <Button variant="outline" onClick={async () => {
+              try {
+                setIsMigrating(true);
+                const remote = await importRemoteToLocal();
+                if (remote && remote.length > 0) {
+                  const saved = productService.setAllProducts(remote);
+                  setProducts(saved);
+                  toast.success("Produits importés depuis Supabase.");
+                } else {
+                  toast.message("Aucun produit distant trouvé.");
+                }
+              } catch (err: any) {
+                console.error(err);
+                toast.error("Erreur lors de l'import: " + (err?.message || String(err)));
+              } finally {
+                setIsMigrating(false);
+              }
+            }} disabled={isMigrating}>
+              <Cloud className="h-4 w-4 mr-2" />
+              Importer depuis Supabase
             </Button>
             <Button variant="outline" onClick={handleSavePhotos}>
               <Package className="h-4 w-4 mr-2" />
