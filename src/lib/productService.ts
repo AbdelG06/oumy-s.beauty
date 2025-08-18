@@ -1,3 +1,4 @@
+// ...existing code...
 export type Product = {
   id: string;
   name: string;
@@ -17,142 +18,104 @@ const DEFAULT_PRODUCTS: Product[] = [
   {
     id: 'serum',
     name: 'Sérum Éclat',
-      image: imageUrl,
+    price: 29.99,
+    image: '/src/assets/serum.jpg',
+    description: 'Sérum pour illuminer la peau',
+    category: 'Soins',
+    stock: 50,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
 
-      createdAt: new Date().toISOString(),
-
-      updatedAt: new Date().toISOString()
-
-    };
-
-    
-
-    const updatedProducts = [...products, newProduct];
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
-
-    return newProduct;
-
+export const productService = {
+  getAllProducts: (): Product[] => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
+      return DEFAULT_PRODUCTS;
+    }
+    try {
+      return JSON.parse(raw) as Product[];
+    } catch {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
+      return DEFAULT_PRODUCTS;
+    }
   },
 
-
-
-  // Mettre à jour un produit
-
-  updateProduct: (id: string, updates: Partial<Omit<Product, "id" | "createdAt">>): Product | null => {
-
+  createProduct: (data: Partial<Product>): Product => {
     const products = productService.getAllProducts();
-
-    const productIndex = products.findIndex(p => p.id === id);
-
-    
-
-    if (productIndex === -1) return null;
-
-    
-
-    // Gérer l'image : si c'est un fichier, créer une URL temporaire
-
-    let imageUrl = updates.image || products[productIndex].image;
-
-    if (updates.imageFile) {
-
-      imageUrl = URL.createObjectURL(updates.imageFile);
-
+    const id = (data.id || data.name || `prod-${Date.now()}`).toString().replace(/\s+/g, '-').toLowerCase();
+    let imageUrl = data.image || '';
+    if (data.imageFile) {
+      imageUrl = URL.createObjectURL(data.imageFile);
     }
+    const newProduct: Product = {
+      id,
+      name: data.name || 'Untitled',
+      price: data.price ?? 0,
+      image: imageUrl,
+      description: data.description || '',
+      category: data.category,
+      stock: data.stock ?? 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const updatedProducts = [...products, newProduct];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+    return newProduct;
+  },
 
-    
+  updateProduct: (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null => {
+    const products = productService.getAllProducts();
+    const index = products.findIndex(p => p.id === id);
+    if (index === -1) return null;
+
+    let imageUrl = updates.image ?? products[index].image;
+    if (updates.imageFile) imageUrl = URL.createObjectURL(updates.imageFile);
 
     const updatedProduct: Product = {
-
-      ...products[productIndex],
-
+      ...products[index],
       ...updates,
-
       image: imageUrl,
-
       updatedAt: new Date().toISOString()
-
     };
-
-    
-
-    products[productIndex] = updatedProduct;
-
+    products[index] = updatedProduct;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-
     return updatedProduct;
-
   },
-
-
-
-  // Supprimer un produit
 
   deleteProduct: (id: string): boolean => {
-
     const products = productService.getAllProducts();
-
-    const filteredProducts = products.filter(p => p.id !== id);
-
-    
-
-    if (filteredProducts.length === products.length) {
-
-      return false; // Produit non trouvé
-
-    }
-
-    
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredProducts));
-
+    const filtered = products.filter(p => p.id !== id);
+    if (filtered.length === products.length) return false;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
     return true;
-
   },
-
-
-
-  // Réinitialiser les produits par défaut
 
   resetToDefault: (): Product[] => {
-
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-
     return DEFAULT_PRODUCTS;
-
   },
 
-  // Corriger les images cassées
   fixBrokenImages: (): Product[] => {
     const products = productService.getAllProducts();
-    const fixedProducts = products.map(product => {
+    const fixed = products.map(product => {
       if (!product.image || product.image.includes('/src/assets/')) {
-        const defaultProduct = DEFAULT_PRODUCTS.find(p => p.id === product.id);
-        if (defaultProduct) {
-          return { ...product, image: defaultProduct.image };
-        }
+        const def = DEFAULT_PRODUCTS.find(p => p.id === product.id);
+        if (def) return { ...product, image: def.image };
       }
       return product;
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixedProducts));
-    return fixedProducts;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fixed));
+    return fixed;
   },
 
-  // Sauvegarder les photos dans le localStorage
   savePhotos: (): Product[] => {
     const products = productService.getAllProducts();
-    // Forcer la sauvegarde de toutes les images
-    const savedProducts = products.map(product => {
-      if (product.image && !product.image.includes('blob:')) {
-        // Si l'image n'est pas un blob temporaire, la sauvegarder
-        return product;
-      }
-      return product;
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedProducts));
-    return savedProducts;
+    // Ici on pourrait implémenter une logique de persist d'images si besoin
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    return products;
   }
-
 };
-
+// ...existing code...
