@@ -38,6 +38,17 @@ export async function fetchRemoteProducts(): Promise<Product[] | null> {
   }));
 }
 
+export async function importRemoteToLocal(): Promise<Product[] | null> {
+  const remote = await fetchRemoteProducts();
+  if (!remote || remote.length === 0) return remote;
+  // Normalize images that point to local dev paths
+  const normalized = remote.map(p => ({
+    ...p,
+    image: typeof p.image === 'string' && p.image.startsWith('/src/assets/') ? p.image.replace('/src/assets/', '/pic/') : p.image
+  }));
+  return normalized;
+}
+
 export async function pushLocalToRemote(localProducts: Product[]): Promise<Product[]> {
   if (!supabase) throw new Error('Supabase not configured');
   // Ensure bucket exists is not done here; assume created in Supabase dashboard

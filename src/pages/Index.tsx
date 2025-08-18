@@ -9,6 +9,7 @@ import { Phone, Instagram, Music, Settings } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { SITE } from "@/config/site";
 import { productService, type Product } from "@/lib/productService";
+import { importRemoteToLocal } from "@/lib/supabaseProductService";
 
 const LOGO_URL = "/pic/logo.png";
 
@@ -32,10 +33,22 @@ const Index = () => {
 
   // Charger les produits depuis le service
   useEffect(() => {
-    const allProducts = productService.getAllProducts();
-    // Corriger automatiquement les images cassées
-    const fixedProducts = productService.fixBrokenImages();
-    setProducts(fixedProducts);
+    const load = async () => {
+      // 1) Load local as immediate fallback
+      const fixedLocal = productService.fixBrokenImages();
+      setProducts(fixedLocal);
+      // 2) Try remote import to ensure clients get admin-published products across devices
+      try {
+        const remote = await importRemoteToLocal();
+        if (remote && remote.length > 0) {
+          const saved = productService.setAllProducts(remote);
+          setProducts(saved);
+        }
+      } catch (_) {
+        // ignore network errors; keep local
+      }
+    };
+    load();
   }, []);
 
   const total = useMemo(() => cart.reduce((sum, item) => sum + (products.find(p => p.id === item.id)?.price || 0) * item.qty, 0), [cart, products]);
