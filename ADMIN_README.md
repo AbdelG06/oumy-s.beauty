@@ -153,10 +153,9 @@ npm run dev
 
 Les produits ajoutés/modifiés/supprimés dans l'administration sont automatiquement reflétés sur la page principale de la boutique.
 
-### Mise à jour en temps réel
-- Les changements sont immédiatement visibles
-- Pas besoin de recharger la page
-- Notifications toast pour confirmer les actions
+- Boutons Admin:
+  - "Migrer vers Supabase": pousse les produits locaux (les images en base64 sont uploadées dans le bucket public et remplacées par des URLs publiques)
+  - "Importer depuis Supabase": récupère la dernière version depuis Supabase et l'enregistre localement
 
 ## 📱 Responsive Design
 

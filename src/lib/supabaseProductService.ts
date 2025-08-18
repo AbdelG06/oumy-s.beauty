@@ -72,12 +72,12 @@ export async function pushLocalToRemote(localProducts: Product[]): Promise<Produ
       image: imageUrl,
       category: p.category,
       stock: p.stock ?? 0,
-      created_at: p.createdAt,
-      updated_at: p.updatedAt
+      created_at: p.createdAt || new Date().toISOString(),
+      updated_at: new Date().toISOString()
     });
   }
 
-  const { data, error } = await supabase.from(TABLE).upsert(rows, { onConflict: 'id', returning: 'representation' } as any);
+  const { data, error } = await supabase.from(TABLE).upsert(rows, { onConflict: 'id', ignoreDuplicates: false } as any).select('*');
   if (error) throw error;
 
   // Map returned rows to Product[] shape
