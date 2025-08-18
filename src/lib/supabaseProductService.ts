@@ -11,8 +11,12 @@ async function uploadImageDataUrl(filename: string, dataUrl: string): Promise<st
   if (!match) throw new Error('Invalid data URL');
   const mime = match[1];
   const b64 = match[2];
-  const buffer = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  const { data, error: uploadErr } = await supabase.storage.from(BUCKET).upload(filename, buffer, {
+  // Convert base64 to Blob for browser-friendly upload
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes], { type: mime });
+  const { data, error: uploadErr } = await supabase.storage.from(BUCKET).upload(filename, blob, {
     contentType: mime,
     upsert: true
   } as any);

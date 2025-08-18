@@ -26,6 +26,10 @@ do $$ begin
   if not exists (
     select 1 from pg_policies where schemaname = 'public' and tablename = 'products' and policyname = 'Allow anon upsert'
   ) then
-    create policy "Allow anon upsert" on public.products for all using (true) with check (true);
+    create policy "Allow anon upsert" on public.products for insert with check (true);
+    create policy "Allow anon update" on public.products for update using (true) with check (true);
   end if;
 end $$;
+
+-- Ensure storage bucket exists and is public (run in Storage UI if needed)
+-- create bucket product-photos (public)
