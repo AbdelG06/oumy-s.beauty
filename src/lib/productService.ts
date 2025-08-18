@@ -14,6 +14,7 @@ export type Product = {
 
 const STORAGE_KEY = 'oumy_beauty_products';
 
+// ...existing code...
 const DEFAULT_PRODUCTS: Product[] = [
   {
     id: 'serum',
@@ -25,8 +26,9 @@ const DEFAULT_PRODUCTS: Product[] = [
     stock: 50,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
-  }
-];
+  } // <-- ferme l'objet
+]; // <-- ferme le tableau
+// ...existing code...Set-Location "C:\Users\gkaki\Desktop\ALL\HTML\oumysbeauty org"
 
 export const productService = {
   getAllProducts: (): Product[] => {
