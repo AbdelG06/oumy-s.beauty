@@ -31,6 +31,7 @@ L'interface d'administration permet de gérer complètement le catalogue de prod
 - **Interface d'administration** : `http://localhost:8081/admin`
 
 ## 📋 Guide d'utilisation
+Note: Il n'y a plus de produits par défaut. Tout commence vide jusqu'à ce que vous ajoutiez des produits dans l'admin, puis ils sont synchronisés via Supabase si configuré.
 
 ### 1. Connexion
 1. Accédez à `/admin/login`

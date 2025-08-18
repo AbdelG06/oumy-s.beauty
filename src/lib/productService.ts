@@ -14,32 +14,15 @@ export type Product = {
 
 const STORAGE_KEY = 'oumy_beauty_products';
 
-const DEFAULT_PRODUCTS: Product[] = [
-  {
-    id: 'serum',
-    name: 'Sérum Éclat',
-    price: 29.99,
-    image: '/src/assets/serum.jpg',
-    description: 'Sérum pour illuminer la peau',
-    category: 'Soins',
-    stock: 50,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
 export const productService = {
   getAllProducts: (): Product[] => {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-      return DEFAULT_PRODUCTS;
-    }
+    if (!raw) return [];
     try {
       return JSON.parse(raw) as Product[];
     } catch {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-      return DEFAULT_PRODUCTS;
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
     }
   },
 
@@ -98,17 +81,11 @@ export const productService = {
     return true;
   },
 
-  resetToDefault: (): Product[] => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-    return DEFAULT_PRODUCTS;
-  },
-
   fixBrokenImages: (): Product[] => {
     const products = productService.getAllProducts();
     const fixed = products.map(product => {
       if (!product.image || product.image.includes('/src/assets/')) {
-        const def = DEFAULT_PRODUCTS.find(p => p.id === product.id);
-        if (def) return { ...product, image: def.image };
+        return { ...product, image: '/placeholder.svg' };
       }
       return product;
     });

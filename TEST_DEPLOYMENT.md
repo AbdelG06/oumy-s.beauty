@@ -12,7 +12,7 @@
 - **Solution** : 
   - Images déplacées dans `/public/`
   - Correction automatique des chemins cassés
-  - Boutons de réinitialisation dans l'admin
+  - Suppression des produits par défaut; plus de "Réinitialiser"
 
 ### ✅ 3. Configuration Vercel
 - **Fichier** : `vercel.json` avec redirection des routes
@@ -53,7 +53,7 @@ npm run preview
 ## Boutons ajoutés dans l'admin
 
 - **"Corriger les images"** : Corrige automatiquement les chemins cassés
-- **"Réinitialiser"** : Remet les produits par défaut
+// Réinitialiser supprimé: nous ne livrons plus de produits par défaut
 
 ## Structure finale
 

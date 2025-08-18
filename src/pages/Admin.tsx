@@ -128,11 +128,7 @@ const Admin = () => {
     }
   };
 
-  const handleResetToDefault = () => {
-    const defaultProducts = productService.resetToDefault();
-    setProducts(defaultProducts);
-    toast.success("Produits réinitialisés aux valeurs par défaut !");
-  };
+  // resetToDefault removed: we no longer ship default products
 
   const handleFixBrokenImages = () => {
     const fixedProducts = productService.fixBrokenImages();
