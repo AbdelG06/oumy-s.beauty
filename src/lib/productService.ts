@@ -1,4 +1,3 @@
-// ...existing code...
 export type Product = {
   id: string;
   name: string;
@@ -14,6 +13,15 @@ export type Product = {
 
 const STORAGE_KEY = 'oumy_beauty_products';
 
+// Convert a File to a persistent Data URL so it can be synced across devices
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 export const productService = {
   getAllProducts: (): Product[] => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -26,12 +34,12 @@ export const productService = {
     }
   },
 
-  createProduct: (data: Partial<Product>): Product => {
+  createProduct: async (data: Partial<Product>): Promise<Product> => {
     const products = productService.getAllProducts();
     const id = (data.id || data.name || `prod-${Date.now()}`).toString().replace(/\s+/g, '-').toLowerCase();
     let imageUrl = data.image || '';
     if (data.imageFile) {
-      imageUrl = URL.createObjectURL(data.imageFile);
+      imageUrl = await fileToDataUrl(data.imageFile);
     }
     const newProduct: Product = {
       id,
@@ -54,13 +62,13 @@ export const productService = {
     return products;
   },
 
-  updateProduct: (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null => {
+  updateProduct: async (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<Product | null> => {
     const products = productService.getAllProducts();
     const index = products.findIndex(p => p.id === id);
     if (index === -1) return null;
 
     let imageUrl = updates.image ?? products[index].image;
-    if (updates.imageFile) imageUrl = URL.createObjectURL(updates.imageFile);
+    if (updates.imageFile) imageUrl = await fileToDataUrl(updates.imageFile);
 
     const updatedProduct: Product = {
       ...products[index],
@@ -100,4 +108,3 @@ export const productService = {
     return products;
   }
 };
-// ...existing code...
