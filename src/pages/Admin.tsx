@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Edit, Trash2, Package, LogOut, Settings, Cloud } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { productService, type Product } from "@/lib/productService";
-import { pushLocalToRemote } from "@/lib/supabaseProductService";
+import { pushLocalToRemote, fetchRemoteProducts } from "@/lib/supabaseProductService";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -237,6 +237,24 @@ const Admin = () => {
             }} disabled={isMigrating}>
               <Cloud className="h-4 w-4 mr-2" />
               {isMigrating ? 'Migration...' : 'Migrer vers Supabase'}
+            </Button>
+            <Button variant="outline" onClick={async () => {
+              try {
+                const remote = await fetchRemoteProducts();
+                if (remote && remote.length) {
+                  // Remplacer le local par le distant
+                  localStorage.setItem('oumy_beauty_products', JSON.stringify(remote));
+                  setProducts(remote);
+                  toast.success("Produits importés depuis Supabase.");
+                } else {
+                  toast.error("Aucun produit trouvé sur Supabase ou Supabase non configuré.");
+                }
+              } catch (e: any) {
+                console.error(e);
+                toast.error("Erreur lors de l'import: " + (e?.message || String(e)));
+              }
+            }}>
+              Importer depuis Supabase
             </Button>
             <Button variant="outline" onClick={handleSavePhotos}>
               <Package className="h-4 w-4 mr-2" />

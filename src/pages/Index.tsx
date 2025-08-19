@@ -9,6 +9,7 @@ import { Phone, Instagram, Music, Settings } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { SITE } from "@/config/site";
 import { productService, type Product } from "@/lib/productService";
+import { fetchRemoteProducts } from "@/lib/supabaseProductService";
 
 const LOGO_URL = "/pic/logo.png";
 
@@ -30,12 +31,28 @@ const Index = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
-  // Charger les produits depuis le service
+  // Charger les produits : tenter Supabase si configuré, sinon fallback local
   useEffect(() => {
-    const allProducts = productService.getAllProducts();
-    // Corriger automatiquement les images cassées
-    const fixedProducts = productService.fixBrokenImages();
-    setProducts(fixedProducts);
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const remote = await fetchRemoteProducts();
+        if (!cancelled && remote && remote.length) {
+          setProducts(remote);
+          return;
+        }
+      } catch (e) {
+        // Ignorer et retomber sur le local
+        console.warn("Échec du chargement depuis Supabase, fallback local", e);
+      }
+      if (!cancelled) {
+        // Corriger automatiquement les images cassées depuis le local
+        const fixedProducts = productService.fixBrokenImages();
+        setProducts(fixedProducts);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   const total = useMemo(() => cart.reduce((sum, item) => sum + (products.find(p => p.id === item.id)?.price || 0) * item.qty, 0), [cart, products]);

@@ -7,4 +7,8 @@ export const supabase: SupabaseClient | null = (SUPABASE_URL && SUPABASE_ANON_KE
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('[Supabase] Variables VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY manquantes. Le site utilisera le stockage local.');
+}
+
 export default supabase;
