@@ -45,6 +45,8 @@ export const productService = {
     }
   },
 
+  // Historique: la fonction s'appelait "createProduct"; 
+  // garder un alias pour compatibilité si elle est utilisée ailleurs.
   createProduct: (data: Partial<Product>): Product => {
     const products = productService.getAllProducts();
     const id = (data.id || data.name || `prod-${Date.now()}`).toString().replace(/\s+/g, '-').toLowerCase();
@@ -66,6 +68,11 @@ export const productService = {
     const updatedProducts = [...products, newProduct];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
     return newProduct;
+  },
+
+  // Alias plus explicite utilisé par l'admin
+  addProduct: (data: Partial<Product>): Product => {
+    return (productService as any).createProduct(data);
   },
 
   updateProduct: (id: string, updates: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null => {
