@@ -25,7 +25,8 @@ export async function fetchRemoteProducts(): Promise<Product[] | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.from(TABLE).select('*').order('created_at', { ascending: false });
   if (error) throw error;
-  return (data as any[]).map(d => ({
+  const rows = Array.isArray(data) ? data : [];
+  return rows.map(d => ({
     id: d.id,
     name: d.name,
     description: d.description,

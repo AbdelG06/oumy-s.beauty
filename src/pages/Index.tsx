@@ -176,7 +176,7 @@ const Index = () => {
               Oumy's Beauty – élégance et douceur
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-prose">
-              Découvrez une sélection de soins et de maquillage inspirés par l’esthétique rose gold du logo. Commandez en ligne et payez à la livraison.
+              Oumy’S beauty Produits de beauté & soins pour sublimer votre peau vous trouverez tout type de maquillage Naturel, tendance & testé avec amour
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#produits"><Button variant="hero" size="xl">Voir les produits</Button></a>
