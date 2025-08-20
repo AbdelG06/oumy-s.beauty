@@ -25,7 +25,8 @@ export async function fetchRemoteProducts(): Promise<Product[] | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.from(TABLE).select('*').order('created_at', { ascending: false });
   if (error) throw error;
-  return (data as any[]).map(d => ({
+  const rows = Array.isArray(data) ? data : [];
+  return rows.map(d => ({
     id: d.id,
     name: d.name,
     description: d.description,
@@ -66,11 +67,13 @@ export async function pushLocalToRemote(localProducts: Product[]): Promise<Produ
     });
   }
 
-  const { data, error } = await supabase.from(TABLE).upsert(rows, { onConflict: 'id', returning: 'representation' } as any);
+  // Supabase v2 ne retourne pas les lignes pour upsert sans .select()
+  const { data, error } = await (supabase.from(TABLE).upsert(rows, { onConflict: 'id' } as any).select('*') as any);
   if (error) throw error;
 
-  // Map returned rows to Product[] shape
-  const returned = (data as any[]).map(d => ({
+  // Map returned rows to Product[] shape (data peut être null si rien n'a changé)
+  const rowsToMap = (data ?? []) as any[];
+  const returned = rowsToMap.map(d => ({
     id: d.id,
     name: d.name,
     price: Number(d.price),
