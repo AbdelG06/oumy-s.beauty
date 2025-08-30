@@ -112,13 +112,15 @@ const Index = () => {
             <img src={LOGO_URL} alt="Logo Oumy's Beauty – silhouette rose gold" className="h-9 w-auto" loading="eager" />
             <span className="font-display text-lg">Oumy's Beauty</span>
           </a>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a href="#produits" className="story-link">Produits</a>
-            <a href="#localisation" className="story-link">Localisation</a>
-            <a href="/admin/login" className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
-              <Settings className="h-4 w-4" />
-              Admin
-            </a>
+          <nav className="flex items-center gap-6 text-sm">
+            <div className="hidden md:flex items-center gap-6">
+              <a href="#produits" className="story-link">Produits</a>
+              <a href="#localisation" className="story-link">Localisation</a>
+              <a href="/admin/login" className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+                <Settings className="h-4 w-4" />
+                Admin
+              </a>
+            </div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button variant="soft">Panier ({cart.reduce((n, i) => n + i.qty, 0)})</Button>
